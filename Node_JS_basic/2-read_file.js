@@ -1,0 +1,55 @@
+const fs = require('fs');
+
+/**
+ * Counts and logs student data synchronously from a CSV file.
+ * @param {string} path - Path to the CSV database file.
+ */
+function countStudents(path) {
+  let fileContent;
+
+  try {
+    fileContent = fs.readFileSync(path, 'utf-8');
+  } catch (error) {
+    throw new Error('Cannot load the database');
+  }
+
+  // Split lines and filter out empty lines
+  const lines = fileContent.split('\n').filter((line) => line.trim() !== '');
+
+  // If the file only contains headers or is empty
+  if (lines.length <= 1) {
+    console.log('Number of students: 0');
+    return;
+  }
+
+  // Remove header line
+  const studentRows = lines.slice(1);
+
+  const fields = {};
+  let totalStudents = 0;
+
+  for (const row of studentRows) {
+    const studentData = row.split(',');
+
+    if (studentData.length >= 4) {
+      const firstname = studentData[0].trim();
+      const field = studentData[3].trim();
+
+      if (firstname && field) {
+        if (!fields[field]) {
+          fields[field] = [];
+        }
+        fields[field].push(firstname);
+        totalStudents += 1;
+      }
+    }
+  }
+
+  console.log(`Number of students: ${totalStudents}`);
+
+  for (const [field, names] of Object.entries(fields)) {
+    console.log(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}`);
+  }
+}
+
+module.exports = countStudents;
